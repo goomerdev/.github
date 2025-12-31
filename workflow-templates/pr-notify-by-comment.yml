@@ -1,0 +1,74 @@
+name: PR Slack by Comment
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  prepare:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+
+    outputs:
+      trigger: ${{ steps.cmd.outputs.trigger }}
+      repo: ${{ steps.pr.outputs.repo }}
+      title: ${{ steps.pr.outputs.title }}
+      url: ${{ steps.pr.outputs.url }}
+      author: ${{ steps.pr.outputs.author }}
+      reviewers_json: ${{ steps.pr.outputs.reviewers_json }}
+
+    steps:
+      - name: Parse /send-review command
+        id: cmd
+        run: |
+          BODY="${{ github.event.comment.body }}"
+          BODY="$(echo "$BODY" | tr -d '\r')"
+
+          if [[ ! "$BODY" =~ ^/send-review ]]; then
+            echo "trigger=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          TITLE="${BODY#/send-review}"
+          TITLE="$(echo "$TITLE" | xargs)"
+
+          if [[ "$TITLE" == "" || "$TITLE" == "null" ]]; then
+            TITLE=""
+          fi
+
+          echo "trigger=true" >> $GITHUB_OUTPUT
+          echo "custom_title=$TITLE" >> $GITHUB_OUTPUT
+
+      - name: Fetch PR data
+        if: steps.cmd.outputs.trigger == 'true'
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prUrl = context.payload.issue.pull_request.url;
+            const pr = await github.request(prUrl);
+
+            const customTitle = `${{ steps.cmd.outputs.custom_title }}`;
+
+            return {
+              repo: `${context.repo.owner}/${context.repo.repo}`,
+              title: customTitle || pr.data.title,
+              url: pr.data.html_url,
+              author: pr.data.user.login,
+              reviewers_json: JSON.stringify(pr.data.requested_reviewers)
+            };
+
+  notify:
+    needs: prepare
+    if: needs.prepare.outputs.trigger == 'true'
+    uses: <ORG_OR_USER>/<REUSABLE_REPO>/.github/workflows/pr-opened-notify.yml@main
+    with:
+      repo: ${{ needs.prepare.outputs.repo }}
+      title: ${{ needs.prepare.outputs.title }}
+      url: ${{ needs.prepare.outputs.url }}
+      author: ${{ needs.prepare.outputs.author }}
+      reviewers_json: ${{ needs.prepare.outputs.reviewers_json }}
+
+    # Secrets required by the reusable workflow must be defined
+    # in the consumer repository (example: SLACK_WEBHOOK_URL)
+    secrets: inherit

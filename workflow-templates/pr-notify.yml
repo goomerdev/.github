@@ -1,0 +1,23 @@
+name: PR Opened
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+
+jobs:
+  notify-slack:
+    # Executed only for PRs targeting the 'master' branch
+    # and having at least one requested reviewer
+    if: ${{ github.event.pull_request.base.ref == 'master' && github.event.pull_request.requested_reviewers[0] }}
+    uses: <ORG_OR_USER>/<REUSABLE_REPO>/.github/workflows/<REUSABLE_WORKFLOW_NAME>.yml@main
+    with:
+      repo: ${{ github.repository }}
+      title: ${{ github.event.pull_request.title }}
+      url: ${{ github.event.pull_request.html_url }}
+      author: ${{ github.event.pull_request.user.login }}
+      reviewers_json: ${{ toJson(github.event.pull_request.requested_reviewers) }}
+
+    # Secrets required by the reusable workflow must be defined
+    # in the consumer repository (example: SLACK_WEBHOOK_URL)
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
