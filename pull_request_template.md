@@ -7,11 +7,6 @@
 
 ## Descrição
 
-> Descreva de forma clara:
-> - Qual problema esta PR resolve
-> - Por que a mudança é necessária (contexto técnico ou de negócio)
-> - O impacto esperado para o usuário ou sistema
-
 -
 
 ## Changelog
@@ -20,11 +15,10 @@
 **Impacto**:
 
 - Qual problema esta PR resolve e por que a mudança é necessária. [JIRA](https://goomer.atlassian.net/browse/SGMD-XXXX)
--
 
 ## Notas adicionais
 
 > Espaço livre para o que o projeto precisar: dependências de outras PRs, como testar,
-> links (JIRA, docs), observações ou checklist.
+> observações ou checklist.
 
 -
