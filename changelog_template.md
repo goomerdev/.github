@@ -6,7 +6,7 @@ Descrição: um bullet por mudança, focando no impacto para o usuário.
 Link de JIRA é opcional — inclua quando houver ([JIRA](url)); omita quando não houver.
 -->
 
-**Deploy {{DD/MM}}** - {{🚀|🐛}}
+**Deploy** - {{DD/MM}} {{🚀|🐛}}
 
 **Produtos afetados:** {{Painel | Dashboard | Delivery | Servidor local | ...}}
 
